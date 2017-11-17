@@ -26,7 +26,6 @@ import java.util.List;
 public class Music_Sorter_3000
 {
     public  File musicFile;
-    //public File[] artists;
     public  ArrayList<Track> playlistSongs = new ArrayList<Track>();
     public  ArrayList<String> playlistSongTitles = new ArrayList<String>();
     public  ArrayList<AudioFile> songsToClean = new ArrayList<AudioFile>();
@@ -179,7 +178,6 @@ public class Music_Sorter_3000
             {
                 System.out.println("SHIT FUCK I HATE THIS "+ e.getMessage());
             }
-
         }
     }
 
