@@ -42,8 +42,8 @@ public class Music_Sorter_3000
         {
             System.out.println("bad file");
         }
-        File[] artists = musicFile.listFiles();
-        for(File song : artists)
+        File[] temp = musicFile.listFiles();
+        for(File song : temp)
         {
             try {
                 AudioFile tune = AudioFileIO.read(song);
@@ -124,7 +124,6 @@ public class Music_Sorter_3000
 
                 File temp = new File(path + "\\" + tempTitle + ".mp3");
                 songA.getFile().renameTo(temp);
-                songsToSort.add(songA);
             }
         }
         catch (Exception e)
@@ -136,6 +135,20 @@ public class Music_Sorter_3000
     public  void sort()
     {
         String rootPath = musicFile.getPath();
+
+        musicFile = new File("C:\\Users\\Caitlin\\IdeaProjects\\MusicSorter3000\\.idea\\src\\tunes");
+        File[] temp = musicFile.listFiles();
+        for(File song : temp)
+        {
+            try {
+                AudioFile tune = AudioFileIO.read(song);
+                songsToSort.add(tune);
+            }
+            catch(Exception ex)
+            {
+                System.out.println("BAD SONG NO HOW DARE YOU"+ ex.getMessage());
+            }
+        }
 
         for (AudioFile song : songsToSort)
         {
@@ -158,10 +171,6 @@ public class Music_Sorter_3000
             String title = tag.getFirst(FieldKey.TITLE);
             File songA = song.getFile();
             File songB = new File(albumFolder.getPath() + "\\" + title + ".mp3" );
-            //if(songA.renameTo(songB))
-            //{
-            //    System.out.println("success");
-            //}
             try
             {
                 com.google.common.io.Files.move(songA, songB);
@@ -181,10 +190,6 @@ public class Music_Sorter_3000
         if(!sorter3000.songsToClean.isEmpty())
         {
             sorter3000.clean();
-        }
-
-        if(!sorter3000.songsToSort.isEmpty())
-        {
             sorter3000.sort();
         }
 
