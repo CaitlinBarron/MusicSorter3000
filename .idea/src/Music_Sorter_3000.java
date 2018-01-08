@@ -44,17 +44,21 @@ public class Music_Sorter_3000
         File[] temp = musicFile.listFiles();
         for(File song : temp)
         {
-            try {
-                AudioFile tune = AudioFileIO.read(song);
-                songsToClean.add(tune);
-            }
-            catch(Exception ex)
+            if(song.isFile())
             {
-                System.out.println("BAD SONG NO HOW DARE YOU"+ ex.getMessage());
+                try {
+                    AudioFile tune = AudioFileIO.read(song);
+                    songsToClean.add(tune);
+                }
+                catch(Exception ex)
+                {
+                    System.out.println("BAD SONG NO HOW DARE YOU"+ ex.getMessage());
+                }
             }
         }
     }
 
+    //get songs from a spotify playlist and fill the playlistSongs and playlistSongTitles lists
     public  void getPlaylistSongs()
     {
         String accessToken = "";
@@ -71,6 +75,7 @@ public class Music_Sorter_3000
             Api api = Api.builder().accessToken(accessToken).build();
             PlaylistRequest req = api.getPlaylist(userId, playlistId).build();
 
+            //get songs from playlist and fill lists with song info
             Playlist playlist = req.get();
             List<PlaylistTrack> list = playlist.getTracks().getItems();
             for (PlaylistTrack track : list)
@@ -84,7 +89,6 @@ public class Music_Sorter_3000
         {
             System.out.println("Something went wrong!" + e.getMessage());
         }
-
     }
 
     public  void clean()
@@ -95,8 +99,12 @@ public class Music_Sorter_3000
             String album = "";
 
             for (AudioFile songA : songsToClean) {
+                //songA = downloaded, songB = spotify
+                String songAFile = songA.getFile().getName();
+                String[] parts = songAFile.split("\\.");
                 Tag tag = songA.getTag();
-                String songATitle = tag.getFirst(FieldKey.TITLE);
+                //String songATitle = tag.getFirst(FieldKey.TITLE);
+                String songATitle = parts[0];
                 int i = playlistSongTitles.indexOf(songATitle);
 
                 if (i != -1) {
@@ -113,6 +121,7 @@ public class Music_Sorter_3000
                     System.out.println("SHIT");
                 }
 
+                tag.setField(FieldKey.TITLE, songATitle);
                 tag.setField(FieldKey.ALBUM, album);
                 tag.setField(FieldKey.ARTIST, artist);
                 tag.setField(FieldKey.COMMENT, "");
@@ -139,13 +148,16 @@ public class Music_Sorter_3000
         File[] temp = musicFile.listFiles();
         for(File song : temp)
         {
-            try {
-                AudioFile tune = AudioFileIO.read(song);
-                songsToSort.add(tune);
-            }
-            catch(Exception ex)
+            if (song.isFile())
             {
-                System.out.println("BAD SONG NO HOW DARE YOU"+ ex.getMessage());
+                try {
+                    AudioFile tune = AudioFileIO.read(song);
+                    songsToSort.add(tune);
+                }
+                catch(Exception ex)
+                {
+                    System.out.println("BAD SONG NO HOW DARE YOU"+ ex.getMessage());
+                }
             }
         }
 
