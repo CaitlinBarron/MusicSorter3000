@@ -58,8 +58,23 @@ public class Music_Sorter_3000
         }
     }
 
+    public String cleanString(String inStr)
+    {
+        String temp = "";
+        temp = inStr.replace("\\", "");
+        temp = temp.replace("/", "");
+        temp = temp.replace(":", "");
+        temp = temp.replace("*", "");
+        temp = temp.replace("?", "");
+        temp = temp.replace("\"", "");
+        temp = temp.replace("<", "");
+        temp = temp.replace(">", "");
+        temp = temp.replace("|", "");
+        return temp;
+    }
+
     //get songs from a spotify playlist and fill the playlistSongs and playlistSongTitles lists
-    public  void getPlaylistSongs()
+    public void getPlaylistSongs()
     {
         String accessToken = "";
         String userId = "cb987654";
@@ -82,7 +97,8 @@ public class Music_Sorter_3000
             {
                 Track song = track.getTrack();
                 playlistSongs.add(song);
-                playlistSongTitles.add(song.getName());
+                String temp = cleanString(song.getName());
+                playlistSongTitles.add(temp); //used only for indexing
             }
         }
         catch (Exception e)
@@ -91,7 +107,7 @@ public class Music_Sorter_3000
         }
     }
 
-    public  void clean()
+    public void clean()
     {
         try {
             String title = "";
@@ -99,12 +115,12 @@ public class Music_Sorter_3000
             String album = "";
 
             for (AudioFile songA : songsToClean) {
+
                 //songA = downloaded, songB = spotify
                 String songAFile = songA.getFile().getName();
-                String[] parts = songAFile.split("\\.");
+                String songATitle = songAFile.replace(".mp3", "");
                 Tag tag = songA.getTag();
-                //String songATitle = tag.getFirst(FieldKey.TITLE);
-                String songATitle = parts[0];
+
                 int i = playlistSongTitles.indexOf(songATitle);
 
                 if (i != -1) {
@@ -130,6 +146,8 @@ public class Music_Sorter_3000
                 String tempTitle = tag.getFirst(FieldKey.TITLE);
                 String path = musicFile.getPath();
 
+                tempTitle = cleanString(tempTitle);
+
                 File temp = new File(path + "\\" + tempTitle + ".mp3");
                 songA.getFile().renameTo(temp);
             }
@@ -140,7 +158,7 @@ public class Music_Sorter_3000
         }
     }
 
-    public  void sort()
+    public void sort()
     {
         String rootPath = musicFile.getPath();
 
@@ -166,6 +184,9 @@ public class Music_Sorter_3000
             Tag tag = song.getTag();
             String artist = tag.getFirst(FieldKey.ARTIST);
             String album = tag.getFirst(FieldKey.ALBUM);
+
+            artist = cleanString(artist);
+            album = cleanString(album);
 
             File artistFolder = new File(rootPath + "\\" + artist);
             if(!artistFolder.exists())
