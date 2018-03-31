@@ -28,8 +28,7 @@ public class Music_Sorter_3000
     public  File musicFile;
     public  ArrayList<Track> playlistSongs = new ArrayList<Track>();
     public  ArrayList<String> playlistSongTitles = new ArrayList<String>();
-    public  ArrayList<AudioFile> songsToClean = new ArrayList<AudioFile>();
-    public  ArrayList<AudioFile> songsToSort = new ArrayList<AudioFile>();
+    public  ArrayList<Song> songList = new ArrayList<Song>();
 
     public Music_Sorter_3000()
     {
@@ -46,16 +45,10 @@ public class Music_Sorter_3000
         {
             if(song.isFile())
             {
-                try {
-                    AudioFile tune = AudioFileIO.read(song);
-                    songsToClean.add(tune);
-                }
-                catch(Exception ex)
-                {
-                    System.out.println("BAD SONG NO HOW DARE YOU"+ ex.getMessage());
-                }
+                songList.add(new Song(song));
             }
         }
+        initPlaylist();
     }
 
     public String cleanString(String inStr)
@@ -73,14 +66,13 @@ public class Music_Sorter_3000
         return temp;
     }
 
-    //get songs from a spotify playlist and fill the playlistSongs and playlistSongTitles lists
-    public void getPlaylistSongs()
+    public void initPlaylist()
     {
         String accessToken = "";
         String userId = "cb987654";
         String playlistId = "5nHh2J76YNGK59wyyxJjCA";
-
-        try {
+        try
+        {
             InputStream is = new FileInputStream("C:\\Users\\Caitlin\\IdeaProjects\\MusicSorter3000\\.idea\\src\\auth code.txt");
             BufferedReader buf = new BufferedReader(new InputStreamReader(is));
             accessToken = buf.readLine();
@@ -101,29 +93,26 @@ public class Music_Sorter_3000
                 playlistSongTitles.add(temp); //used only for indexing
             }
         }
-        catch (Exception e)
+        catch (Exception ex)
         {
-            System.out.println("Something went wrong!" + e.getMessage());
+            System.out.println("error in initPlaylist: " + ex.getMessage());
         }
     }
 
     public void clean()
     {
-        try {
-            String title = "";
-            String artist = "";
-            String album = "";
+        try
+        {
+            for (Song song : songList)
+            {
+                String title = "";
+                String artist = "";
+                String album = "";
 
-            for (AudioFile songA : songsToClean) {
+                int i = playlistSongTitles.indexOf(song.title);
 
-                //songA = downloaded, songB = spotify
-                String songAFile = songA.getFile().getName();
-                String songATitle = songAFile.replace(".mp3", "");
-                Tag tag = songA.getTag();
-
-                int i = playlistSongTitles.indexOf(songATitle);
-
-                if (i != -1) {
+                if (i != -1)
+                {
                     Track songB = playlistSongs.get(i);
 
                     title = songB.getName();
@@ -133,28 +122,22 @@ public class Music_Sorter_3000
 
                     album = songB.getAlbum().getName();
 
-                } else {
-                    System.out.println("SHIT");
+                    song.saveTag(title, artist, album);
+
+                    String tempTitle = cleanString(title);
+                    String tempAlbum = cleanString(album);
+                    String tempArtist = cleanString(artist);
+                    song.saveCleanInfo(tempTitle, tempAlbum, tempArtist);
                 }
-
-                tag.setField(FieldKey.TITLE, songATitle);
-                tag.setField(FieldKey.ALBUM, album);
-                tag.setField(FieldKey.ARTIST, artist);
-                tag.setField(FieldKey.COMMENT, "");
-                songA.commit();
-
-                String tempTitle = tag.getFirst(FieldKey.TITLE);
-                String path = musicFile.getPath();
-
-                tempTitle = cleanString(tempTitle);
-
-                File temp = new File(path + "\\" + tempTitle + ".mp3");
-                songA.getFile().renameTo(temp);
+                else
+                {
+                    System.out.println("Oh hot damn. error in clean()");
+                }
             }
         }
         catch (Exception e)
         {
-            System.out.println("SHIT FUCK"+ e.getMessage());
+            System.out.println("error in clean: " + e.getMessage());
         }
     }
 
@@ -162,54 +145,28 @@ public class Music_Sorter_3000
     {
         String rootPath = musicFile.getPath();
 
-        musicFile = new File("C:\\Users\\Caitlin\\IdeaProjects\\MusicSorter3000\\.idea\\src\\tunes");
-        File[] temp = musicFile.listFiles();
-        for(File song : temp)
+        for (Song song : songList)
         {
-            if (song.isFile())
-            {
-                try {
-                    AudioFile tune = AudioFileIO.read(song);
-                    songsToSort.add(tune);
-                }
-                catch(Exception ex)
-                {
-                    System.out.println("BAD SONG NO HOW DARE YOU"+ ex.getMessage());
-                }
-            }
-        }
-
-        for (AudioFile song : songsToSort)
-        {
-            Tag tag = song.getTag();
-            String artist = tag.getFirst(FieldKey.ARTIST);
-            String album = tag.getFirst(FieldKey.ALBUM);
-
-            artist = cleanString(artist);
-            album = cleanString(album);
-
-            File artistFolder = new File(rootPath + "\\" + artist);
+            File artistFolder = new File(rootPath + "\\" + song.artist);
             if(!artistFolder.exists())
             {
                 artistFolder.mkdir();
             }
 
-            File albumFolder = new File(artistFolder.getPath() + "\\" + album);
+            File albumFolder = new File(artistFolder.getPath() + "\\" + song.album);
             if(!albumFolder.exists())
             {
                 albumFolder.mkdir();
             }
 
-            String title = tag.getFirst(FieldKey.TITLE);
-            File songA = song.getFile();
-            File songB = new File(albumFolder.getPath() + "\\" + title + ".mp3" );
+            File songB = new File(albumFolder.getPath() + "\\" + song.title + ".mp3" );
             try
             {
-                com.google.common.io.Files.move(songA, songB);
+                com.google.common.io.Files.move(song.songFile.getFile(), songB);
             }
             catch(Exception e)
             {
-                System.out.println("SHIT FUCK I HATE THIS "+ e.getMessage());
+                System.out.println("SHIT FUCK I HATE THIS. Error in sort()");
             }
         }
     }
@@ -217,8 +174,7 @@ public class Music_Sorter_3000
     public static void main(String[] args)
     {
         Music_Sorter_3000 sorter3000 = new Music_Sorter_3000();
-        sorter3000.getPlaylistSongs();
-        if(!sorter3000.songsToClean.isEmpty())
+        if(!sorter3000.songList.isEmpty())
         {
             sorter3000.clean();
             sorter3000.sort();
