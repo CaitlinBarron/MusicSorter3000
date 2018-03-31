@@ -113,6 +113,8 @@ public class Music_Sorter_3000
 
                 if (i != -1)
                 {
+                    song.spotifyFlag = true;
+
                     Track songB = playlistSongs.get(i);
 
                     title = songB.getName();
@@ -127,11 +129,8 @@ public class Music_Sorter_3000
                     String tempTitle = cleanString(title);
                     String tempAlbum = cleanString(album);
                     String tempArtist = cleanString(artist);
+
                     song.saveCleanInfo(tempTitle, tempAlbum, tempArtist);
-                }
-                else
-                {
-                    System.out.println("Oh hot damn. error in clean()");
                 }
             }
         }
@@ -147,26 +146,29 @@ public class Music_Sorter_3000
 
         for (Song song : songList)
         {
-            File artistFolder = new File(rootPath + "\\" + song.artist);
-            if(!artistFolder.exists())
+            if (song.spotifyFlag == true)
             {
-                artistFolder.mkdir();
-            }
+                File artistFolder = new File(rootPath + "\\" + song.artist);
+                if(!artistFolder.exists())
+                {
+                    artistFolder.mkdir();
+                }
 
-            File albumFolder = new File(artistFolder.getPath() + "\\" + song.album);
-            if(!albumFolder.exists())
-            {
-                albumFolder.mkdir();
-            }
+                File albumFolder = new File(artistFolder.getPath() + "\\" + song.album);
+                if(!albumFolder.exists())
+                {
+                    albumFolder.mkdir();
+                }
 
-            File songB = new File(albumFolder.getPath() + "\\" + song.title + ".mp3" );
-            try
-            {
-                com.google.common.io.Files.move(song.songFile.getFile(), songB);
-            }
-            catch(Exception e)
-            {
-                System.out.println("SHIT FUCK I HATE THIS. Error in sort()");
+                File songB = new File(albumFolder.getPath() + "\\" + song.title + ".mp3" );
+                try
+                {
+                    com.google.common.io.Files.move(song.songFile.getFile(), songB);
+                }
+                catch(Exception e)
+                {
+                    System.out.println("SHIT FUCK I HATE THIS. Error in sort()");
+                }
             }
         }
     }

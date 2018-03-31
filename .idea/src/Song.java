@@ -31,6 +31,7 @@ public class Song
     public String artist;
     public String album;
     public AudioFile songFile;
+    public boolean spotifyFlag;
 
     public Song(File file)
     {
@@ -41,6 +42,7 @@ public class Song
             this.title = songFile.getFile().getName().replace(".mp3", "");
             this.album = "";
             this.artist = "";
+            this.spotifyFlag = false;
         }
         catch(Exception ex)
         {
