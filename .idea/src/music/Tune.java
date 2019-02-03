@@ -1,9 +1,5 @@
-import com.wrapper.spotify.Api;
-import com.wrapper.spotify.methods.PlaylistRequest;
-import com.wrapper.spotify.methods.PlaylistTracksRequest;
-import com.wrapper.spotify.methods.Request;
-import com.wrapper.spotify.models.*;
-import org.apache.commons.lang.ObjectUtils;
+package music;
+
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.audio.exceptions.CannotReadException;
@@ -24,7 +20,7 @@ import java.util.List;
 /**
  * Created by Caitlin on 3/31/2018.
  */
-public class Song
+public class Tune
 {
     public Tag tag;
     public String title;
@@ -33,7 +29,7 @@ public class Song
     public AudioFile songFile;
     public boolean spotifyFlag;
 
-    public Song(File file)
+    public Tune(File file)
     {
         try
         {

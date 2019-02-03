@@ -1,8 +1,8 @@
-import com.wrapper.spotify.Api;
-import com.wrapper.spotify.methods.PlaylistRequest;
-import com.wrapper.spotify.methods.PlaylistTracksRequest;
-import com.wrapper.spotify.methods.Request;
-import com.wrapper.spotify.models.*;
+package music;
+
+import com.wrapper.spotify.SpotifyApi;
+import com.wrapper.spotify.model_objects.specification.*;
+import com.wrapper.spotify.requests.data.playlists.GetPlaylistsTracksRequest;
 import org.jaudiotagger.audio.AudioFile;
 import org.jaudiotagger.audio.AudioFileIO;
 import org.jaudiotagger.audio.exceptions.CannotReadException;
@@ -16,9 +16,12 @@ import org.jaudiotagger.tag.Tag;
 import org.jaudiotagger.tag.TagException;
 
 import java.io.*;
+import java.lang.reflect.Array;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import music.Tune;
 
 /**
  * Created by Caitlin on 11/9/2017.
@@ -28,7 +31,7 @@ public class Music_Sorter_3000
     public  File musicFile;
     public  ArrayList<Track> playlistSongs = new ArrayList<Track>();
     public  ArrayList<String> playlistSongTitles = new ArrayList<String>();
-    public  ArrayList<Song> songList = new ArrayList<Song>();
+    public  ArrayList<Tune> songList;
 
     public Music_Sorter_3000()
     {
@@ -41,11 +44,13 @@ public class Music_Sorter_3000
             System.out.println("bad file");
         }
         File[] temp = musicFile.listFiles();
+        songList = new ArrayList<Tune>();
         for(File song : temp)
         {
             if(song.isFile())
             {
-                songList.add(new Song(song));
+                Tune songItem = new Tune(song);
+                songList.add(songItem);
             }
         }
         initPlaylist();
@@ -79,12 +84,13 @@ public class Music_Sorter_3000
             accessToken = accessToken.replace("\n", "").replace("\r", "");
             is.close();
 
-            Api api = Api.builder().accessToken(accessToken).build();
-            PlaylistRequest req = api.getPlaylist(userId, playlistId).build();
+            SpotifyApi api = new SpotifyApi.Builder().setAccessToken(accessToken).build();
+            GetPlaylistsTracksRequest req = api.getPlaylistsTracks(playlistId).build();
 
             //get songs from playlist and fill lists with song info
-            Playlist playlist = req.get();
-            List<PlaylistTrack> list = playlist.getTracks().getItems();
+            Paging<PlaylistTrack> playlist = req.execute();
+            PlaylistTrack[] playlistArray = playlist.getItems();
+            List<PlaylistTrack> list = Arrays.asList(playlistArray);
             for (PlaylistTrack track : list)
             {
                 Track song = track.getTrack();
@@ -103,7 +109,7 @@ public class Music_Sorter_3000
     {
         try
         {
-            for (Song song : songList)
+            for (Tune song : songList)
             {
                 String title = "";
                 String artist = "";
@@ -119,7 +125,8 @@ public class Music_Sorter_3000
 
                     title = songB.getName();
 
-                    List<SimpleArtist> artists = songB.getArtists();
+                    ArtistSimplified[] artistsArray = songB.getArtists();
+                    List<ArtistSimplified> artists = Arrays.asList(artistsArray);
                     artist = artists.get(0).getName();
 
                     album = songB.getAlbum().getName();
@@ -144,7 +151,7 @@ public class Music_Sorter_3000
     {
         String rootPath = musicFile.getPath();
 
-        for (Song song : songList)
+        for (Tune song : songList)
         {
             if (song.spotifyFlag == true)
             {
